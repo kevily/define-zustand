@@ -1,7 +1,7 @@
 import { create, StoreApi as ZStoreApi } from 'zustand'
 import { combine } from 'zustand/middleware'
 import { produce } from 'immer'
-import { forEach, isEqual, size } from 'lodash-es'
+import { forEach, isEqualWith, keys, omit, some } from 'lodash-es'
 
 export type StoreApi<S> = Omit<ZStoreApi<S>, 'setState'> & {
     setState: (updater: ((state: S) => void) | Partial<S>, replace?: boolean) => void
@@ -17,17 +17,17 @@ export type actionsType<S, OptionAction, InsideActions = unknown> = (
 ) => OptionAction
 
 export type defGetterStateType<S> = Record<string, (state: S) => any>
+
+export type ExtraGetterState<S, G extends defGetterStateType<S>> = {
+    [key in keyof G]: ReturnType<G[key]>
+}
 export interface optionsType<S, G, OptionAction> {
     state: () => S
     getter: G
     actions: actionsType<S, OptionAction>
 }
 
-export type ExtraGetterStateType<S, G extends defGetterStateType<S>> = {
-    [key in keyof G]: ReturnType<G[key]>
-}
-
-export default function defineZustand<
+export function define<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
     OptionActions extends Record<string, any>
@@ -37,24 +37,24 @@ export default function defineZustand<
         forEach(options.getter, (getter, k) => {
             state[k] = getter(state)
         })
-        return state as S & ExtraGetterStateType<S, G>
+        return state as S & ExtraGetterState<S, G>
     }
     return create(
         combine(createDefState(), (set, get, store) => {
             // getterListener
             // ----------------------------------------------------------------------
             store.subscribe((state, prevState) => {
-                let equalledLen = 0
-                const newGetterState: any = {}
-                forEach(options.getter, (getter, k) => {
-                    const value = getter(state)
-                    if (isEqual(value, prevState[k])) {
-                        equalledLen += 1
-                    } else {
+                const getterKeys = keys(options.getter)
+                const isUpdate = isEqualWith(
+                    omit(state, getterKeys),
+                    omit(prevState, getterKeys),
+                    (current, prev) => some(current, (v, k) => v !== prev[k])
+                )
+                if (isUpdate) {
+                    const newGetterState: any = {}
+                    forEach(options.getter, (getter, k) => {
                         newGetterState[k] = getter(state)
-                    }
-                })
-                if (size(options.getter) > equalledLen) {
+                    })
                     set(newGetterState)
                 }
             })
