@@ -25,11 +25,9 @@ const useStore = defineStore({
     }
 })
 function ReactComponent() {
-    const { count, setState, reset } = useStore(state => ({
-        count: state.count,
-        setState: state.setState,
-        reset: state.reset
-    }))
+    const count = useStore(state => state.count)
+    const setState = useStore(state => state.setState)
+    const reset = useStore(state => state.reset)
 
     useEffect(() => {
         return () => {
