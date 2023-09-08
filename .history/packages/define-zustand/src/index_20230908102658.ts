@@ -27,7 +27,7 @@ export interface optionsType<S, G, OptionAction> {
     actions: actionsType<S, OptionAction>
 }
 
-export default function defineZustand<
+export default function define<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
     OptionActions extends Record<string, any>
