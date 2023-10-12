@@ -16,7 +16,7 @@ export function creator<
     OptionActions extends Record<string, any>
 >(
     options: optionsType<S, G, OptionActions>
-): StateCreator<S & ExtraGetterState<S, G> & insideActionsType<S>> {
+): StateCreator<S & ExtraGetterState<S, G> & insideActionsType<S> & OptionActions> {
     function createDefState() {
         const state: any = options.state()
         forEach(options.getter, (getter, k) => {
