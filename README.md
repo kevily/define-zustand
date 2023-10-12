@@ -1,15 +1,18 @@
 # define-zustand
+
 > Quickly define [zustand](https://github.com/pmndrs/zustand) state
 
 ## Install
+
 ```shell
 pnpm i define-zustand
 npm i define-zustand
 ```
 
 ## Use
+
 ```tsx
-import defineStore from 'define-zustand'
+import { defineStore, defineContext } from 'define-zustand'
 
 /**
  * @return zustand hooks
@@ -21,9 +24,24 @@ const useStore = defineStore({
     }),
     action: () => ({}),
     getter: {
-        count: state => state.a + state.b 
+        count: state => state.a + state.b
     }
 })
+const { Provider, useContext } = defineContext({
+    state: () => ({
+        a: 1,
+        b: 1
+    }),
+    action: () => ({}),
+    getter: {
+        count: state => state.a + state.b
+    }
+})
+
+function Child() {
+    const count = useContext(state => state.count)
+    return <div>{count}</div>
+}
 function ReactComponent() {
     const count = useStore(state => state.count)
     const setState = useStore(state => state.setState)
@@ -33,12 +51,24 @@ function ReactComponent() {
         return () => {
             reset()
         }
-    }, []);
-    
-    return <div>
-        <button onClick={() => setState({ a: 2 })}>setA</button>
-        <button onClick={() => setState(state => {state.b += 1})}>setB</button>
-        <div>{count}</div>
-    </div>
+    }, [])
+
+    return (
+        <Provider>
+            <div>
+                <button onClick={() => setState({ a: 2 })}>setA</button>
+                <button
+                    onClick={() =>
+                        setState(state => {
+                            state.b += 1
+                        })
+                    }>
+                    setB
+                </button>
+                <div>{count}</div>
+            </div>
+            <Child />
+        </Provider>
+    )
 }
 ```

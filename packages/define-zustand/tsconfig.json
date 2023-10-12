@@ -5,6 +5,7 @@
         "allowSyntheticDefaultImports": true,
         "allowJs": true,
         "target": "ESNext",
+        "jsx": "react-jsx",
         "noImplicitAny": false,
         "moduleResolution": "node",
         "sourceMap": false,
