@@ -91,7 +91,7 @@ export function defineContext<
     }
     function $useContext<T>(selector: (state: ReturnType<typeof creatorResult>) => T): T {
         const store = useContext(Context)
-        if (!store) throw new Error('Missing BearContext.Provider in the tree')
+        if (!store) throw new Error('Missing Provider in the tree')
         return useStore(store, selector)
     }
 
