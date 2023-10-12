@@ -83,10 +83,10 @@ export function defineContext<
     OptionActions extends Record<string, any>
 >(options: optionsType<S, G, OptionActions>) {
     const creatorResult = creator(options)
-    const store = createStore<ReturnType<typeof creatorResult>>()(creatorResult)
-    const Context = createContext<typeof store | null>(null)
+    const $createStore = () => createStore<ReturnType<typeof creatorResult>>()(creatorResult)
+    const Context = createContext<ReturnType<typeof $createStore> | null>(null)
     const Provider: FunctionComponent<{ children?: ReactNode }> = ({ children }) => {
-        const storeRef = useRef(store)
+        const storeRef = useRef($createStore())
         return <Context.Provider value={storeRef.current}>{children}</Context.Provider>
     }
     function $useContext<T>(selector: (state: ReturnType<typeof creatorResult>) => T): T {
