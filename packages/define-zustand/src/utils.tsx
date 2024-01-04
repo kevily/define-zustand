@@ -10,6 +10,11 @@ import {
     StoreApi
 } from './types'
 
+export function defineStateFactory<Options extends optionsType<any, any, any>>(
+    options: Options
+): () => Options {
+    return () => options
+}
 export function creator<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
