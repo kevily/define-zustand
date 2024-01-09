@@ -14,7 +14,10 @@ npm i define-zustand
 ```tsx
 import { defineStore, defineContext, defineStateFactory } from 'define-zustand'
 
-const stateFatory = defineStateFactory({
+/**
+ * @return zustand hooks
+ */
+const useStore = defineStore({
     state: () => ({
         a: 1,
         b: 1
@@ -23,12 +26,21 @@ const stateFatory = defineStateFactory({
     getter: {
         count: state => state.a + state.b
     }
-}) 
-/**
- * @return zustand hooks
- */
-const useStore = defineStore(stateFatory())
-const { Provider, useContext } = defineContext(stateFatory())
+})
+
+// Use defineModelFactory
+const stateFactory = defineStateFactory({
+    state: () => ({
+        a: 1,
+        b: 1
+    }),
+    action: () => ({}),
+    getter: {
+        count: state => state.a + state.b
+    }
+})
+const useStore = defineStore(stateFactory())
+const { Provider, useContext } = defineContext(stateFactory())
 
 function Child() {
     const count = useContext(state => state.count)
@@ -54,7 +66,8 @@ function ReactComponent() {
                         setState(state => {
                             state.b += 1
                         })
-                    }>
+                    }
+                >
                     setB
                 </button>
                 <div>{count}</div>
