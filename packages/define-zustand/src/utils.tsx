@@ -1,7 +1,7 @@
 import { createContext, FunctionComponent, ReactNode, useRef, useContext } from 'react'
 import { create, createStore, useStore } from 'zustand'
 import { produce } from 'immer'
-import { forEach, isEqual, isEqualWith, keys, omit, pick, some } from 'lodash-es'
+import { forOwn, isEqual, isEqualWith, keys, omit, pick, some } from 'lodash-es'
 import {
     defGetterStateType,
     optionsType,
@@ -25,7 +25,7 @@ export function creator<
 >(options: optionsType<S, G, Actions>) {
     function createDefState() {
         const state: any = options.state()
-        forEach(options.getter, (getter, k) => {
+        forOwn(options.getter, (getter, k) => {
             state[k] = getter(state)
         })
         return state as S & ExtraGetterState<S, G>
@@ -42,7 +42,7 @@ export function creator<
             )
             if (isUpdate) {
                 const newGetterState: any = pick(state, getterKeys)
-                forEach(options.getter, (getter, k) => {
+                forOwn(options.getter, (getter, k) => {
                     if (isEqual(newGetterState[k], getter(state))) {
                         return
                     }
