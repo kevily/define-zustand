@@ -1,5 +1,5 @@
 import { createContext, FunctionComponent, ReactNode, useRef, useContext } from 'react'
-import { create, createStore, useStore, StateCreator } from 'zustand'
+import { create, createStore, useStore } from 'zustand'
 import { produce } from 'immer'
 import { forEach, isEqual, isEqualWith, keys, omit, pick, some } from 'lodash-es'
 import {
@@ -7,21 +7,22 @@ import {
     optionsType,
     ExtraGetterState,
     insideActionsType,
-    StoreApi
+    modelStateType
 } from './types'
 
-export function defineStateFactory<Options extends optionsType<any, any, any>>(
-    options: Options
-): () => Options {
-    return () => options
-}
-export function creator<
+export function defineStateFactory<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
     OptionActions extends Record<string, any>
->(
-    options: optionsType<S, G, OptionActions>
-): StateCreator<S & ExtraGetterState<S, G> & insideActionsType<S> & OptionActions> {
+>(options: optionsType<S, G, OptionActions>) {
+    return () => options
+}
+
+export function creator<
+    S extends Record<string, any>,
+    G extends defGetterStateType<S>,
+    Actions extends Record<string, any>
+>(options: optionsType<S, G, Actions>) {
     function createDefState() {
         const state: any = options.state()
         forEach(options.getter, (getter, k) => {
@@ -55,38 +56,34 @@ export function creator<
         store.setState = (updater, replace) => {
             const nextState = typeof updater === 'function' ? produce(updater as any) : updater
 
-            return set(nextState as any, replace)
+            return set(nextState, replace)
         }
         const reset: insideActionsType<S>['reset'] = () => {
-            set(() => options.state() as never)
+            set(() => options.state())
         }
         return {
             ...createDefState(),
             reset,
-            setState: store.setState as StoreApi<S>['setState'],
+            setState: store.setState,
             subscribe: store.subscribe,
-            ...options.actions(
-                get,
-                { reset, setState: store.setState as StoreApi<S>['setState'] },
-                store as StoreApi<S>
-            )
-        }
+            ...options.actions(get, { reset, setState: store.setState }, store)
+        } as modelStateType<S, G, Actions>
     }
 }
 
 export function defineStore<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
-    OptionActions extends Record<string, any>
->(options: optionsType<S, G, OptionActions>) {
+    Actions extends Record<string, any>
+>(options: optionsType<S, G, Actions>) {
     return create(creator(options))
 }
 
 export function defineContext<
     S extends Record<string, any>,
     G extends defGetterStateType<S>,
-    OptionActions extends Record<string, any>
->(options: optionsType<S, G, OptionActions>) {
+    Actions extends Record<string, any>
+>(options: optionsType<S, G, Actions>) {
     const creatorResult = creator(options)
     const $createStore = () => createStore<ReturnType<typeof creatorResult>>()(creatorResult)
     const Context = createContext<ReturnType<typeof $createStore> | null>(null)
