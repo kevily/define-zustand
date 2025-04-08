@@ -5,9 +5,9 @@ import { forOwn, isEqual, isEqualWith, keys, omit, pick, some } from 'lodash-es'
 import {
     defGetterStateType,
     optionsType,
-    ExtraGetterState,
     insideActionsType,
-    modelStateType
+    modelStateType,
+    stateType
 } from './types'
 
 export function defineStateFactory<
@@ -28,7 +28,7 @@ export function creator<
         forOwn(options.getter, (getter, k) => {
             state[k] = getter(state)
         })
-        return state as S & ExtraGetterState<S, G>
+        return state as stateType<S, G>
     }
     return (set, get, store) => {
         // getterListener

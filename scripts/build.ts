@@ -1,10 +1,21 @@
-import { Engine, babel, tsc, rollup } from '1k-tasks'
+import { Engine, tsc, rollup } from '1k-tasks'
 import * as path from 'path'
 
-const task = new Engine({ root: path.join(process.cwd(), 'packages/define-zustand') })
-task.registry('tsc', tsc)
-task.registry('rollup', rollup, {
-    projectType: 'react'
-})
+async function build(lib: string) {
+    const root = path.join(process.cwd(), 'packages', lib)
+    const ignore = ['**/*.{dts,test,types,type}.ts', '**/*.stories.*']
+    const workDir = 'src'
+    const dest = 'dist'
+    const task = new Engine()
+    task.registry('rollup', rollup.buildReact, {
+        root,
+        workDir,
+        input: '**/*.{ts,tsx}',
+        outputDir: dest,
+        ignore
+    })
+    task.registry('tsc', tsc, { root })
+    task.run({ sync: true, tip: `buliding ${lib}...` })
+}
 
-task.run()
+build('define-zustand')
