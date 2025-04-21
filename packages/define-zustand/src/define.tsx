@@ -1,6 +1,6 @@
 import { createContext, FunctionComponent, ReactNode, useRef, useContext } from 'react'
-import { create, createStore, useStore } from 'zustand'
-import { gettersStateType, optionsType } from './types'
+import { create, createStore, StateCreator, useStore } from 'zustand'
+import { gettersStateType, modelStateType, optionsType } from './types'
 import { storeMiddleware } from './store-middleware'
 
 export function defineStateFactory<

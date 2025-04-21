@@ -58,7 +58,7 @@ export function storeMiddleware<
             reset,
             setState: store.setState,
             subscribe: store.subscribe,
-            ...options.actions(get, { reset, setState: store.setState }, store)
+            ...options.actions(store.setState, get, store)
         }
     }
 }

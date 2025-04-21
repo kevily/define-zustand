@@ -20,25 +20,22 @@ const useStore = defineStore({
         a: state => state.count + 1,
         b: state => state.count2 + 2
     },
-    actions: get => ({
-        test: () => {
-            console.log('1', 1)
-        },
-        t: () => {
-            get()
-        }
+    actions: (setState, getState, store) => ({
+        test: () => getState()
     })
 })
 
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
-export const Primary: Story = {
+export const Demo: Story = {
     render: () => {
         const a = useStore(state => state.a)
         const b = useStore(state => state.b)
         const setState = useStore(state => state.setState)
+        const test = useStore(state => state.test)
 
         console.log('a', a)
         console.log('b', b)
+        console.log('test', test())
         return (
             <>
                 <button

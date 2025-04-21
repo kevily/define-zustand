@@ -17,8 +17,8 @@ export interface insideActionsType<S> {
     subscribe: StoreApi<S>['subscribe']
 }
 export type actionsType<S, G extends gettersStateType<any>, OptionAction> = (
-    getState: () => stateType<S, G> & OptionAction,
-    actions: Omit<insideActionsType<S>, 'subscribe'>,
+    setState: insideActionsType<S>['setState'],
+    getState: () => stateType<S, G> & insideActionsType<S>,
     store: StoreApi<S>
 ) => OptionAction
 
