@@ -1,17 +1,24 @@
 {
     "compilerOptions": {
+        "useDefineForClassFields": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "strictPropertyInitialization": false,
+        "resolveJsonModule": true,
         "module": "ESNext",
         "esModuleInterop": true,
+        "jsx": "react-jsx",
         "allowSyntheticDefaultImports": true,
         "allowJs": true,
         "target": "ESNext",
-        "jsx": "react-jsx",
         "noImplicitAny": false,
-        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
         "sourceMap": false,
         "declaration": true,
         "outDir": "dist",
-        "baseUrl": "."
+        "baseUrl": ".",
+        "emitDeclarationOnly": true
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules/**/*"]

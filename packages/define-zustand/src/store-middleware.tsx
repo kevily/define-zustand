@@ -1,13 +1,7 @@
 import { produce } from 'immer'
 import { forOwn, isEqual, isEqualWith, keys, pick, some } from 'lodash-es'
 import { StateCreator } from 'zustand'
-import {
-    gettersStateType,
-    optionsType,
-    insideActionsType,
-    modelStateType,
-    stateType
-} from './types'
+import { gettersStateType, optionsType, insideActionsType, modelStateType } from './types'
 
 export function storeMiddleware<
     S extends Record<string, any>,
@@ -54,11 +48,11 @@ export function storeMiddleware<
         }
 
         return {
-            ...(state as stateType<S, G>),
+            ...state,
             reset,
             setState: store.setState,
             subscribe: store.subscribe,
-            ...options.actions(store.setState, get, store)
+            ...options.actions(store.setState as never, get, store as never)
         }
     }
 }
