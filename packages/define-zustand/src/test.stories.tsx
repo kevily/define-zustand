@@ -1,4 +1,4 @@
-import { defineStore } from '.'
+import { defineContext, defineStore } from '.'
 import type { Meta, StoryObj } from '@storybook/react'
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
@@ -24,6 +24,26 @@ const useStore = defineStore({
         test: () => getState()
     })
 })
+const { Provider, useContext } = defineContext({
+    state: () => ({
+        count: 0,
+        count2: 0
+    }),
+    getters: {
+        sum: state => state.count + 1
+    },
+    actions: (setState, getState, store) => ({
+        getStore: () => getState()
+    })
+})
+const Child = () => {
+    const sum = useContext(state => state.sum)
+    const getStore = useContext(state => state.getStore)
+
+    console.log('Child store:', getStore())
+
+    return <div>child: {sum}</div>
+}
 
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
 export const Demo: Story = {
@@ -37,7 +57,7 @@ export const Demo: Story = {
         console.log('b', b)
         console.log('test', test())
         return (
-            <>
+            <Provider count={1}>
                 <button
                     onClick={() => {
                         setState(state => {
@@ -52,7 +72,8 @@ export const Demo: Story = {
                     +
                 </button>
                 <div>{a}</div>
-            </>
+                <Child />
+            </Provider>
         )
     }
 }

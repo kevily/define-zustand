@@ -1,6 +1,6 @@
 import { createContext, FunctionComponent, ReactNode, useRef, useContext } from 'react'
-import { create, createStore, StateCreator, useStore } from 'zustand'
-import { gettersStateType, modelStateType, optionsType } from './types'
+import { create, createStore, useStore } from 'zustand'
+import { gettersStateType, optionsType } from './types'
 import { storeMiddleware } from './store-middleware'
 
 export function defineStateFactory<
@@ -27,8 +27,15 @@ export function defineContext<
     const creatorResult = storeMiddleware(options)
     const $createStore = () => createStore<ReturnType<typeof creatorResult>>()(creatorResult)
     const Context = createContext<ReturnType<typeof $createStore> | null>(null)
-    const Provider: FunctionComponent<{ children?: ReactNode }> = ({ children }) => {
-        const storeRef = useRef($createStore())
+    const Provider: FunctionComponent<{ children?: ReactNode } & Partial<S>> = ({
+        children,
+        ...defaultValue
+    }) => {
+        const storeRef = useRef<ReturnType<typeof $createStore>>()
+        if (storeRef.current === void 0) {
+            storeRef.current = $createStore()
+            storeRef.current.setState(defaultValue as never)
+        }
         return <Context.Provider value={storeRef.current}>{children}</Context.Provider>
     }
     function $useContext<T>(selector: (state: ReturnType<typeof creatorResult>) => T): T {
