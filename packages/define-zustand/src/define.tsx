@@ -19,6 +19,42 @@ export function defineStore<
     return create(storeMiddleware(options))
 }
 
+export function defineQuery<P, F extends (params: P) => any>(options: { params: P; queryFn: F }) {
+    return defineStore({
+        state: () => ({
+            params: options.params,
+            loading: false,
+            data: void 0 as Awaited<ReturnType<F>> | undefined,
+            error: void 0 as Error | undefined
+        }),
+        getters: {},
+        actions: (setState, getState) => ({
+            query: async (params?: Partial<P>) => {
+                try {
+                    const state = getState()
+                    setState(state => {
+                        state.loading = true
+                    })
+                    const newParams = { ...state.params, ...params }
+                    const data = await options.queryFn(newParams)
+                    setState(state => {
+                        state.data = data
+                        state.params = newParams
+                    })
+                } catch (error: any) {
+                    setState(state => {
+                        state.error = new Error(error.message)
+                    })
+                } finally {
+                    setState(state => {
+                        state.loading = false
+                    })
+                }
+            }
+        })
+    })
+}
+
 export function defineContext<
     S extends Record<string, any>,
     G extends gettersStateType<S>,
