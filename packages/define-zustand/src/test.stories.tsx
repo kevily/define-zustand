@@ -1,5 +1,5 @@
 import { defineContext, defineStore } from '.'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react-vite'
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
 const meta: Meta = {
@@ -16,10 +16,10 @@ const useStore = defineStore({
         count: 0,
         count2: 0
     }),
-    getters: {
-        a: state => state.count + 1,
-        b: state => state.count2 + 2
-    },
+    getters: state => ({
+        a: state.count + 1,
+        b: state.count2 + 2
+    }),
     actions: (setState, getState, store) => ({
         test: () => getState()
     })
@@ -29,9 +29,9 @@ const { Provider, useContext } = defineContext({
         count: 0,
         count2: 0
     }),
-    getters: {
-        sum: state => state.count + 1
-    },
+    getters: state => ({
+        sum: state.count + 1
+    }),
     actions: (setState, getState, store) => ({
         getStore: () => getState()
     })

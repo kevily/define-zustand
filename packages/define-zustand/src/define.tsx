@@ -1,25 +1,28 @@
 import { createContext, FunctionComponent, ReactNode, useRef, useContext } from 'react'
 import { create, createStore, useStore } from 'zustand'
-import { gettersStateType, optionsType } from './types'
+import { Options } from './types'
 import { storeMiddleware } from './store-middleware'
 
 export function defineStateFactory<
     S extends Record<string, any>,
-    G extends gettersStateType<S>,
+    G extends Record<string, any>,
     Actions extends Record<string, any>
->(options: optionsType<S, G, Actions>) {
+>(options: Options<S, G, Actions>) {
     return () => options
 }
 
 export function defineStore<
     S extends Record<string, any>,
-    G extends gettersStateType<S>,
+    G extends Record<string, any>,
     Actions extends Record<string, any>
->(options: optionsType<S, G, Actions>) {
+>(options: Options<S, G, Actions>) {
     return create(storeMiddleware(options))
 }
 
-export function defineQuery<P, F extends (params: P) => any>(options: { params: P; queryFn: F }) {
+export function defineQuery<F extends (params: any) => any>(options: {
+    queryFn: F
+    params: Parameters<F>[0]
+}) {
     return defineStore({
         state: () => ({
             params: options.params,
@@ -27,9 +30,9 @@ export function defineQuery<P, F extends (params: P) => any>(options: { params: 
             data: void 0 as Awaited<ReturnType<F>> | undefined,
             error: void 0 as Error | undefined
         }),
-        getters: {},
-        actions: (setState, getState) => ({
-            query: async (params?: Partial<P>) => {
+        getters: () => ({}),
+        actions: (setState, getState) => {
+            async function fetchData(params: typeof options.params) {
                 try {
                     const state = getState()
                     setState(state => {
@@ -41,6 +44,7 @@ export function defineQuery<P, F extends (params: P) => any>(options: { params: 
                         state.data = data
                         state.params = newParams
                     })
+                    return data
                 } catch (error: any) {
                     setState(state => {
                         state.error = new Error(error.message)
@@ -51,15 +55,19 @@ export function defineQuery<P, F extends (params: P) => any>(options: { params: 
                     })
                 }
             }
-        })
+            async function refetch(params?: Partial<typeof options.params>) {
+                const state = getState()
+                await options.queryFn({ ...state.params, ...params })
+            }
+            return { fetchData: fetchData as F, refetch }
+        }
     })
 }
-
 export function defineContext<
     S extends Record<string, any>,
-    G extends gettersStateType<S>,
+    G extends Record<string, any>,
     Actions extends Record<string, any>
->(options: optionsType<S, G, Actions>) {
+>(options: Options<S, G, Actions>) {
     const creatorResult = storeMiddleware(options)
     const $createStore = () => createStore<ReturnType<typeof creatorResult>>()(creatorResult)
     const Context = createContext<ReturnType<typeof $createStore> | null>(null)

@@ -1,17 +1,17 @@
 import { produce } from 'immer'
 import { forOwn, isEqual, isEqualWith, keys, pick, some } from 'lodash-es'
 import { StateCreator } from 'zustand'
-import { gettersStateType, optionsType, insideActionsType, modelStateType } from './types'
+import { Options, InsideActions, ModelState } from './types'
 
 export function storeMiddleware<
     S extends Record<string, any>,
-    G extends gettersStateType<S>,
+    G extends Record<string, any>,
     Actions extends Record<string, any>
->(options: optionsType<S, G, Actions>): StateCreator<modelStateType<S, G, Actions>> {
+>(options: Options<S, G, Actions>): StateCreator<ModelState<S, G, Actions>> {
     return (set, get, store) => {
         const state: any = options.state()
-        forOwn(options.getters, (getter, k) => {
-            state[k] = getter(state)
+        forOwn(options.getters(state), (getter, k) => {
+            state[k] = getter
         })
         // getterListener
         // ----------------------------------------------------------------------
@@ -26,12 +26,11 @@ export function storeMiddleware<
             )
             if (isUpdate) {
                 const newGetterState: any = pick(state, getterKeys)
-                forOwn(options.getters, (getter, k) => {
-                    const current = getter(normalState)
-                    if (isEqual(newGetterState[k], current)) {
+                forOwn(options.getters(normalState), (getterState, k) => {
+                    if (isEqual(newGetterState[k], getterState)) {
                         return
                     }
-                    newGetterState[k] = current
+                    newGetterState[k] = getterState
                 })
                 set(newGetterState)
             }
@@ -43,7 +42,7 @@ export function storeMiddleware<
 
             return set(nextState, replace)
         }
-        const reset: insideActionsType<S>['reset'] = () => {
+        const reset: InsideActions<S>['reset'] = () => {
             set(() => options.state() as never)
         }
 

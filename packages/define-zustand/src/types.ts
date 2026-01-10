@@ -1,33 +1,26 @@
 import { StoreApi as ZStoreApi, ExtractState as ZExtractState } from 'zustand'
 
-export type gettersStateType<S> = Record<string, (state: S) => any>
-
-export type ExtraGettersState<G extends gettersStateType<any>> = {
-    [key in keyof G]: ReturnType<G[key]>
-}
-export type stateType<S, G extends gettersStateType<any>> = S & ExtraGettersState<G>
+export type State<S, G> = S & G
 export type StoreApi<S> = Omit<ZStoreApi<S>, 'setState'> & {
     setState: (updater: ((state: S) => void) | Partial<S>, replace?: boolean) => void
 }
 export type ExtractState<S> = ZExtractState<S>
 
-export interface insideActionsType<S> {
+export interface InsideActions<S> {
     reset: () => void
     setState: StoreApi<S>['setState']
     subscribe: StoreApi<S>['subscribe']
 }
-export type actionsType<S, G extends gettersStateType<any>, OptionAction> = (
-    setState: insideActionsType<S>['setState'],
-    getState: () => stateType<S, G> & insideActionsType<S>,
+export type Actions<S, G, OptionAction> = (
+    setState: InsideActions<S>['setState'],
+    getState: () => State<S, G> & InsideActions<S>,
     store: StoreApi<S>
 ) => OptionAction
 
-export interface optionsType<S, G extends gettersStateType<any>, Actions> {
+export interface Options<S, G, A> {
     state: () => S
-    getters: G
-    actions: actionsType<S, G, Actions>
+    getters: (state: S) => G
+    actions: Actions<S, G, A>
 }
 
-export type modelStateType<S, G extends gettersStateType<any>, Actions> = stateType<S, G> &
-    Actions &
-    insideActionsType<S>
+export type ModelState<S, G, A> = State<S, G> & A & InsideActions<S>

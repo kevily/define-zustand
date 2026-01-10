@@ -22,10 +22,10 @@ const useStore = defineStore({
         a: 1,
         b: 1
     }),
-    action: () => ({}),
     getter: {
         count: state => state.a + state.b
-    }
+    },
+    action: () => ({}),
 })
 
 // Use defineModelFactory
@@ -34,10 +34,10 @@ const stateFactory = defineStateFactory({
         a: 1,
         b: 1
     }),
-    action: () => ({}),
     getter: {
         count: state => state.a + state.b
-    }
+    },
+    action: () => ({}),
 })
 const useStore = defineStore(stateFactory())
 const { Provider, useContext } = defineContext(stateFactory())
